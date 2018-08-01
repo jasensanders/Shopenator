@@ -8,16 +8,16 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-  <com.enrandomlabs.jasensanders.v1.folio.camera.CameraSourcePreview
+  <com.enrandomlabs.jasensanders.v1.shopenator.camera.CameraSourcePreview
       android:id="@+id/preview"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
 
-    <com.enrandomlabs.jasensanders.v1.folio.camera.GraphicOverlay
+    <com.enrandomlabs.jasensanders.v1.shopenator.camera.GraphicOverlay
         android:id="@+id/graphicOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-  </com.enrandomlabs.jasensanders.v1.folio.camera.CameraSourcePreview>
+  </com.enrandomlabs.jasensanders.v1.shopenator.camera.CameraSourcePreview>
 
 </LinearLayout>
