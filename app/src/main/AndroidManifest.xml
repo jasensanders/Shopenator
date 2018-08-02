@@ -12,8 +12,6 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
-
-
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -26,9 +24,11 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
         <provider
-            android:authorities="com.enrandomlabs.jasensanders.v1.shopenator"
-            android:name=".database.ShopenatorProvider"/>
+            android:name=".database.ShopenatorProvider"
+            android:authorities="com.enrandomlabs.jasensanders.v1.shopenator" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -39,6 +39,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".services.UPCService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
