@@ -42,7 +42,17 @@
 
         <service
             android:name=".services.UPCService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity
+            android:name=".AddItemActivity"
+            android:label="@string/title_activity_add_item"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.enrandomlabs.jasensanders.v1.shopenator.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

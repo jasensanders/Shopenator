@@ -17,4 +17,33 @@
     <string name="barcode_failure">No barcode captured</string>
     <string name="barcode_error">"Error reading barcode: %1$s"</string>
     <string name="tap_directions">Tap to capture. Pinch/Stretch to zoom</string>
+    <string name="title_activity_add_item">AddItemActivity</string>
+
+    <!-- AddNew Strings-->
+    <string name="title_add_new">Add</string>
+    <string name="scan_button">scan</string>
+    <string name="submit_button">Look Up</string>
+    <string name="input_hint">Enter UPC Digits.</string>
+    <string name="description_hint">Enter description here: </string>
+    <string name="notes_hint">Enter Notes here: </string>
+    <string name="save_button">Save</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="wish_list_button">Add to Wish List</string>
+    <string name="itemSaved">\u0020Saved to Folio.</string>
+
+    <!-- AddNew EditText hint strings-->
+    <string name="NoTitle">Enter Product Name:</string>
+    <string name="NoByline">Enter the byline.</string>
+    <string name="NoAuthor">Enter some author.</string>
+    <string name="NoDate">Enter release year Ex: 2012</string>
+    <string name="NoRatingRuntime">Enter Rating/Runtime</string>
+    <string name="NoStore">Enter Store: </string>
+    <string name="NoImage">Type valid URL for image</string>
+
+    <!-- A11Y Strings -->
+    <string name="barcode_scan_button">Scan Barcode Button</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

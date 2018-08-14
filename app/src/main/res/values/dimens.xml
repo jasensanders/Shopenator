@@ -1,3 +1,46 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!--UPC Text input Dimensions-->
+    <integer name="upc_input_text_size">13</integer>
+    <integer name="min_upc_input_width">8</integer>
+    <integer name="input_max_lines">1</integer>
+    <dimen name="head_line">24sp</dimen>
+    <dimen name="small_fontsize">12sp</dimen>
+    <dimen name="input_container_margin">20dp</dimen>
+    <dimen name="input_editText_padding">@dimen/input_container_margin</dimen>
+    <dimen name="scan_button_drawable_padding">8dp</dimen>
+    <dimen name="scan_button_height">48dp</dimen>
+
+    <!--AddNewActivity Dimensions-->
+    <dimen name="title_text_size">26sp</dimen>
+    <dimen name="title_padding">20dp</dimen>
+    <dimen name="art_image_height">172dp</dimen>
+    <dimen name="art_image_width">102dp</dimen>
+    <dimen name="art_image_horizontal_margin">18dp</dimen>
+    <dimen name="sub_text_margin_top">10dp</dimen>
+    <dimen name="wish_list_checkbox_margin">30dp</dimen>
+    <dimen name="synopsis_margin">20dp</dimen>
+    <dimen name="branding_image_height">47dp</dimen>
+    <dimen name="branding_image_width">120dp</dimen>
+
+    <dimen name="store_input_padding">20dp</dimen>
+    <integer name="store_input_max_lines">2</integer>
+    <dimen name="notes_input_padding">20dp</dimen>
+    <integer name="notes_input_min_lines">5</integer>
+
+    <dimen name="save_cancel_button_container_height">65dp</dimen>
+    <dimen name="save_cancel_button_margin">10dp</dimen>
+    <dimen name="save_cancel_button_height">48dp</dimen>
+
+    <dimen name="trailer_tile_text_size">20sp</dimen>
+    <dimen name="trailer_tile_drawable_size">60dp</dimen>
+    <dimen name="trailer_tile_margin">20dp</dimen>
+
+
 </resources>

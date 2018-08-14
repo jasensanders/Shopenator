@@ -4,8 +4,10 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.enrandomlabs.jasensanders.v1.shopenator.AddItemActivity;
 import com.enrandomlabs.jasensanders.v1.shopenator.BuildConfig;
 
 import org.json.JSONException;
@@ -175,17 +177,17 @@ public class UPCService extends IntentService {
         }
     }
 
-//    private void sendApologies(String message){
-//        sendDataBack( new String[]{message, param1, "none", NOT_FOUND});
-//    }
-//
-//    private void sendError(String message){
-//        sendDataBack(new String[]{message, param1, "none", SERVER_ERROR});
-//    }
-//
-//    private void sendDataBack(String[] movieData){
-//        Intent messageIntent = new Intent(AddNewActivity.SERVICE_EVENT_MOVIE);
-//        messageIntent.putExtra(AddNewActivity.SERVICE_EXTRA_MOVIE,movieData);
-//        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(messageIntent);
-//    }
+    private void sendApologies(String message){
+        sendDataBack( new String[]{message, "none", NOT_FOUND});
+    }
+
+    private void sendError(String message){
+        sendDataBack(new String[]{message, "none", SERVER_ERROR});
+    }
+
+    private void sendDataBack(String[] data){
+        Intent messageIntent = new Intent(AddItemActivity.SERVICE_EVENT_UPC);
+        messageIntent.putExtra(AddItemActivity.SERVICE_EXTRA_UPC, data);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(messageIntent);
+    }
 }
