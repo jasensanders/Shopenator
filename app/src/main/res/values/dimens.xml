@@ -42,5 +42,13 @@
     <dimen name="trailer_tile_drawable_size">60dp</dimen>
     <dimen name="trailer_tile_margin">20dp</dimen>
 
+    <!--List item Dimensions-->
+    <dimen name="image_view_listItem_width">28dp</dimen>
+    <dimen name="image_view_listItem_height">36dp</dimen>
+    <dimen name="icon_thumbnail_margin">16dp</dimen>
+    <dimen name="list_item_text_margin">10dp</dimen>
+    <dimen name="headline_text_size">17sp</dimen>
+    <dimen name="byline_text_size">14sp</dimen>
+
 
 </resources>

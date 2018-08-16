@@ -5,4 +5,8 @@
     <color name="colorAccent">#FF4081</color>
     <color name="dividerGray">#EDEDED</color>
     <color name="colorBlack">#000000</color>
+
+    <color name="secondary_text">#677278</color>
+    <color name="primary_text">#000000</color>
+    <color name="photo_placeholder">#CCCCCC</color>
 </resources>

@@ -256,4 +256,18 @@ public class Utility {
         }
         return false;
     }
+
+    public static String addDateToYear(String date){
+        String[] temp;
+        try{
+            temp = date.split(", ");
+            return temp[1];
+        }catch (NullPointerException e){
+            //Log.e("Utility class","Error splitting addDate year");
+            return "XXXX";
+        }
+
+    }
+
+
 }
