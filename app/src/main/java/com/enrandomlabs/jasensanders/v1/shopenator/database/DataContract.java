@@ -49,7 +49,7 @@ public class DataContract {
             ItemEntry.COLUMN_TITLE,
             ItemEntry.COLUMN_PACKAGE_ART,
             ItemEntry.COLUMN_BARCODE_IMG,
-            ItemEntry.COLUMN_SEVEN,
+            ItemEntry.COLUMN_PRICE,
             ItemEntry.COLUMN_R_DATE,
             ItemEntry.COLUMN_ADD_DATE,
             ItemEntry.COLUMN_STORE,
@@ -59,6 +59,23 @@ public class DataContract {
             ItemEntry.COLUMN_FOURTEEN,
             ItemEntry.COLUMN_FIFTEEN,
             ItemEntry.COLUMN_SIXTEEN
+    };
+
+    public static final String[] ITEMLIST_COLUMNS = {
+            //col 0
+            ItemEntry.COLUMN_UPC,
+            //col 1
+            ItemEntry.COLUMN_THUMB,
+            //col 2
+            ItemEntry.COLUMN_TITLE,
+            //col 3
+            ItemEntry.COLUMN_ADD_DATE,
+            //col 4
+            ItemEntry.COLUMN_PRICE,
+            //col 5
+            ItemEntry.COLUMN_STATUS,
+            //col 6
+            ItemEntry.COLUMN_STORE
     };
 
     // Item Column Indexes
@@ -97,7 +114,7 @@ public class DataContract {
         // Url for the upc barcode image
         public static final String COLUMN_BARCODE_IMG = "BARCODE_IMG";
         // String title of movie
-        public static final String COLUMN_SEVEN = "SEVEN";
+        public static final String COLUMN_PRICE = "PRICE";
         // Item Release Date String in the format yyyy-mm-dd
         public static final String COLUMN_R_DATE = "RELEASE_DATE";
         // Date Item Was added to database as a string

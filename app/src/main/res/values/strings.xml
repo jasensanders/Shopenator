@@ -2,6 +2,9 @@
     <string name="app_name">Shopenator</string>
     <string name="action_settings">Settings</string>
 
+    <!--Main Activity Strings -->
+    <string name="empty_list">No items added yet.</string>
+
 
     <!-- Barcode Capture Strings-->
     <string name="barcode_activity_label">Read Barcode</string>

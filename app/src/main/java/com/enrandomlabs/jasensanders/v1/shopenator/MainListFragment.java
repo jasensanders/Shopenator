@@ -1,23 +1,26 @@
 package com.enrandomlabs.jasensanders.v1.shopenator;
 
-import android.app.LoaderManager;
-import android.content.Context;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.enrandomlabs.jasensanders.v1.shopenator.database.DataContract;
 
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MainListFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
  * Use the {@link MainListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
@@ -27,11 +30,29 @@ public class MainListFragment extends Fragment implements LoaderManager.LoaderCa
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    //Loader state represents ViewType State
+    private int mListLoader = 0;
+    //Triggers a search based on the above Loader/View state
+    private static final int SEARCH_LOADER = 3500;
+
+    //State variables
+    private String mSortOrder = DataContract.ItemEntry.COLUMN_ADD_DATE + DataContract.DESC;
+    private Fragment mCurrentFragment;
+    private int mPermission;
+    private boolean mTwoPaneMode = false;
+
+
+    //Views
+    private SearchView mSearchView;
+    private TextView mEmptyView;
+    private RecyclerView itemList;
+    private ListItemAdapter listItemAdapter;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
+
 
     public MainListFragment() {
         // Required empty public constructor
@@ -65,63 +86,94 @@ public class MainListFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main_list, container, false);
+        View root = inflater.inflate(R.layout.fragment_main_list, container, false);
+
+        // Set two pane mode
+        mTwoPaneMode = (root.findViewById(R.id.detail_container) != null);
+        // Initialize empty view
+        mEmptyView = root.findViewById(R.id.recyclerView_empty);
+
+        // Initialize recycler view
+        itemList = root.findViewById(R.id.content_list);
+
+        // Load available data from ShopenatorProvider
+        getLoaderManager().initLoader(mListLoader, null, this);
+
+
+
+        return root;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
 
     @Override
+    @NonNull
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return null;
+
+
+        return new CursorLoader(getActivity(),
+                DataContract.ItemEntry.buildUriAll(),
+                DataContract.ITEMLIST_COLUMNS,
+                null,
+                null,
+                mSortOrder);
     }
+
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+        if (data.moveToFirst()) {
+
+            mEmptyView.setVisibility(View.GONE);
+            itemList.setVisibility(View.VISIBLE);
+            listItemAdapter = new ListItemAdapter(getActivity());
+            listItemAdapter.swapCursor(data);
+
+            //This is only used in TWO PANE mode
+            listItemAdapter.setOnItemClickedListener(new ListItemAdapter.OnItemClickedListener() {
+                @Override
+                public void onItemClicked(Uri data, String status) {
+                    launchTwoPaneFragment(data, status);
+                }
+            });
+            itemList.setAdapter(listItemAdapter);
+            LinearLayoutManager list = new LinearLayoutManager(getActivity());
+            list.setOrientation(LinearLayoutManager.VERTICAL);
+            itemList.setLayoutManager(list);
+            itemList.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, R.drawable.line_divider));
+
+        } else {
+
+            itemList.setAdapter(null);
+            itemList.removeAllViews();
+            itemList.setVisibility(View.GONE);
+            mEmptyView.setVisibility(View.VISIBLE);
+        }
 
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+
+        if(listItemAdapter != null) {
+            listItemAdapter.swapCursor(null);
+        }
+
+    }
+
+    //Only used in TWO PANE mode
+    public void launchTwoPaneFragment(Uri data, String status) {
+
+        //its a two pane view so load the fragment
+        AddNewFragment fragment = AddNewFragment.newInstance(data);
+        mCurrentFragment = fragment;
+        getFragmentManager().beginTransaction()
+                .replace(R.id.detail_container, fragment)
+                .commit();
 
     }
 }

@@ -33,6 +33,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.enrandomlabs.jasensanders.v1.shopenator.database.DataContract;
 
+import java.util.Currency;
+import java.util.Locale;
+
 
 /**
  * Created by Jasen Sanders on 10/17/2016.
@@ -118,20 +121,24 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.ViewHo
             Glide.with(mContext).load(artUrl).into(holder.artImage);
         }
 
-        //Get data from cursor
+        //Get data from cursor:
+        // Item name
         String title = mCursor.getString(2);
-        String byline = mCursor.getString(4);
+        // Store found at
+        String byline = mCursor.getString(6);
+        // Date added
         String date = mCursor.getString(3);
         String addDate = Utility.addDateToYear(date);
-        String subText = mCursor.getString(6);
+        // Getting the currency name and symbol.
+        Currency currency = Currency.getInstance(Locale.getDefault());
+        String currencyName = currency.getDisplayName(); // Dollars, Euros, Pounds...etc.
+        String symbol = currency.getSymbol(); // $
+        // Price at store
+        String subText = symbol + mCursor.getString(4); //$20.00
 
         //ALLy content descriptions
         String description;
-        if(mCursor.getString(5).startsWith("MOVIE")) {
-            description = title + " " + byline + " " + "Rated " + subText + "added " + date;
-        }else{
-            description = title + " " + byline + " " + subText + " Pages " + "added " + date;
-        }
+        description = title + "at" + byline + " " + subText + currencyName + "added " + date;
         holder.itemView.setContentDescription(description);
 
         //Set data into views
