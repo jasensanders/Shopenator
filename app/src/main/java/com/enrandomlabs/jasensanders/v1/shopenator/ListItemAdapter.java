@@ -71,8 +71,8 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.ViewHo
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
             mCursor.moveToPosition(adapterPosition);
-            String upc = mCursor.getString(0);
-            String status = mCursor.getString(5);
+            String upc = mCursor.getString(DataContract.LIST_COL_UPC);
+            String status = mCursor.getString(DataContract.LIST_COL_STATUS);
             Uri send = DataContract.ItemEntry.buildUPCUri(upc);
 
             //If this is a Tablet View wide enough for Two Pane, send data to Main Activity callback.
@@ -123,18 +123,18 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.ViewHo
 
         //Get data from cursor:
         // Item name
-        String title = mCursor.getString(2);
+        String title = mCursor.getString(DataContract.LIST_COL_TITLE);
         // Store found at
-        String byline = mCursor.getString(6);
+        String byline = mCursor.getString(DataContract.LIST_COL_STORE);
         // Date added
-        String date = mCursor.getString(3);
+        String date = mCursor.getString(DataContract.LIST_COL_ADD_DATE);
         String addDate = Utility.addDateToYear(date);
         // Getting the currency name and symbol.
         Currency currency = Currency.getInstance(Locale.getDefault());
         String currencyName = currency.getDisplayName(); // Dollars, Euros, Pounds...etc.
         String symbol = currency.getSymbol(); // $
         // Price at store
-        String subText = symbol + mCursor.getString(4); //$20.00
+        String subText = symbol + mCursor.getString(DataContract.LIST_COL_PRICE); //$20.00
 
         //ALLy content descriptions
         String description;
@@ -149,8 +149,8 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.ViewHo
 
         //If this is a tablet View launch the first item to fill the fragment
         if(position == 0 && ((AppCompatActivity) mContext).findViewById(R.id.detail_container) != null) {
-            String upc = mCursor.getString(0);
-            String status = mCursor.getString(5);
+            String upc = mCursor.getString(DataContract.LIST_COL_UPC);
+            String status = mCursor.getString(DataContract.LIST_COL_STATUS);
             Uri send = DataContract.ItemEntry.buildUPCUri(upc);
             //Send data to Main Activity callback
             if (mClickListener != null) {

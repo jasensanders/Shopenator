@@ -10,6 +10,13 @@ public class DataContract {
 
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
+    public static final String SEARCHUPC_API_ID = "SEARCHUPC_0";
+
+    public static final String STATUS_RESEARCH = "RESEARCH";
+    public static final String STATUS_OWN = "OWN";
+
+    public static final String PLACEHOLDER = "NONE";
+
     public static final String PATH_ITEM_LIST = "items";
     public static final String PATH_ITEMS_UPC = "items/upc";
     public static final String PATH_ITEMS_AID = "items/apiId";
@@ -42,6 +49,7 @@ public class DataContract {
     }
 
     public static final String[] ITEM_COLUMNS = {
+
             ItemEntry._ID,
             ItemEntry.COLUMN_API_TYPE_ID,
             ItemEntry.COLUMN_UPC,
@@ -56,9 +64,45 @@ public class DataContract {
             ItemEntry.COLUMN_NOTES,
             ItemEntry.COLUMN_STATUS,
             ItemEntry.COLUMN_DESCRIPTION,
-            ItemEntry.COLUMN_FOURTEEN,
+            ItemEntry.COLUMN_URL,
             ItemEntry.COLUMN_FIFTEEN,
             ItemEntry.COLUMN_SIXTEEN
+
+    };
+
+    public static final String[] INSERT_ITEM_COLUMNS = {
+
+            ItemEntry.COLUMN_API_TYPE_ID,
+            ItemEntry.COLUMN_UPC,
+            ItemEntry.COLUMN_THUMB,
+            ItemEntry.COLUMN_TITLE,
+            ItemEntry.COLUMN_PACKAGE_ART,
+            ItemEntry.COLUMN_BARCODE_IMG,
+            ItemEntry.COLUMN_PRICE,
+            ItemEntry.COLUMN_R_DATE,
+            ItemEntry.COLUMN_ADD_DATE,
+            ItemEntry.COLUMN_STORE,
+            ItemEntry.COLUMN_NOTES,
+            ItemEntry.COLUMN_STATUS,
+            ItemEntry.COLUMN_DESCRIPTION,
+            ItemEntry.COLUMN_URL,
+            ItemEntry.COLUMN_FIFTEEN,
+            ItemEntry.COLUMN_SIXTEEN
+
+    };
+
+    public static final String[] UPDATE_ITEM_COLUMNS = {
+
+            ItemEntry.COLUMN_THUMB,
+            ItemEntry.COLUMN_TITLE,
+            ItemEntry.COLUMN_PACKAGE_ART,
+            ItemEntry.COLUMN_PRICE,
+            ItemEntry.COLUMN_STORE,
+            ItemEntry.COLUMN_NOTES,
+            ItemEntry.COLUMN_STATUS,
+            ItemEntry.COLUMN_DESCRIPTION,
+            ItemEntry.COLUMN_URL
+
     };
 
     public static final String[] ITEMLIST_COLUMNS = {
@@ -86,16 +130,25 @@ public class DataContract {
     public static final int COL_TITLE = 4;
     public static final int COL_ART = 5;
     public static final int COL_BAR_IMG = 6;
-    public static final int COL_SEVEN = 7;
+    public static final int COL_PRICE = 7;
     public static final int COL_DATE = 8;
     public static final int COL_ADD_DATE = 9;
     public static final int COL_STORE = 10;
     public static final int COL_NOTES = 11;
     public static final int COL_STATUS = 12;
     public static final int COL_DESC =13;
-    public static final int COL_FOURTEEN = 14;
+    public static final int COL_URL = 14;
     public static final int COL_FIFTEEN = 15;
     public static final int COL_SIXTEEN = 16;
+
+    // Item Tile List Indexes
+    public static final int LIST_COL_UPC = 0;
+    public static final int LIST_COL_THUMB = 1;
+    public static final int LIST_COL_TITLE = 2;
+    public static final int LIST_COL_ADD_DATE = 3;
+    public static final int LIST_COL_PRICE = 4;
+    public static final int LIST_COL_STATUS = 5;
+    public static final int LIST_COL_STORE = 6;
 
 
     public static final class ItemEntry implements BaseColumns {
@@ -128,7 +181,7 @@ public class DataContract {
         // String of the Short description
         public static final String COLUMN_DESCRIPTION = "DESCRIPTION";
         //String of Trailer youtube urls. comma separated.
-        public static final String COLUMN_FOURTEEN = "FOURTEEN";
+        public static final String COLUMN_URL = "URL";
         //String of movie/tv genres. comma separated.
         public static final String COLUMN_FIFTEEN = "FIFTEEN";
         //String imdb number

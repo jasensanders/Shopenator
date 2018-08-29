@@ -20,10 +20,7 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/store_input_padding"
         android:paddingEnd="@dimen/store_input_padding" />
-
-
 
     <EditText
         android:layout_width="match_parent"
@@ -38,34 +35,35 @@
         android:layout_marginTop="4dp"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/notes_input_padding"
         android:paddingEnd="@dimen/notes_input_padding" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin">
 
-    <Button
+        <Button
 
-        android:id="@+id/saveButton"
-        android:layout_weight="1"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:text="@string/save_button"
-        android:textSize="18sp"/>
+            android:id="@+id/saveButton"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:text="@string/save_button"
+            android:textSize="18sp"/>
 
-    <Button
+        <Button
 
-        android:id="@+id/deleteButton"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="?attr/actionBarSize"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:text="@string/delete_button"
-        android:textSize="18sp"
-        android:visibility="gone"/>
+            android:id="@+id/deleteButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="?attr/actionBarSize"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:text="@string/delete_button"
+            android:textSize="18sp"
+            android:visibility="gone"/>
     </LinearLayout>
 
 </LinearLayout>

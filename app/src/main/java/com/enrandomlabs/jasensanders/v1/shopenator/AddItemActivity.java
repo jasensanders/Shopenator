@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
 public class AddItemActivity extends AppCompatActivity {
 
@@ -20,12 +19,13 @@ public class AddItemActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_add_item);
         Intent intent = getIntent();
         Uri data = intent.getData();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+
 
         if(savedInstanceState != null){
             mContent = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_VIEW_KEY);

@@ -53,7 +53,7 @@ public class UPCService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startService(Context context, String param1, String param2) {
+    public static void startService(Context context, String param1) {
         Intent intent = new Intent(context, UPCService.class);
         intent.setAction(ACTION_GET_UPC);
         intent.putExtra(EXTRA_UPC, param1);

@@ -33,14 +33,14 @@
     <string name="cancel_button">Cancel</string>
     <string name="delete_button">Delete</string>
     <string name="wish_list_button">Add to Wish List</string>
-    <string name="itemSaved">\u0020Saved to Folio.</string>
+    <string name="itemSaved">\u0020Saved to Shopenator.</string>
+    <string name="detailItemRemoved">Item removed from Shopenator.</string>
+    <string name="detailItemUpdated">Updates saved to Shopenator.</string>
 
     <!-- AddNew EditText hint strings-->
     <string name="NoTitle">Enter Product Name:</string>
     <string name="NoByline">Enter the byline.</string>
-    <string name="NoAuthor">Enter some author.</string>
     <string name="NoDate">Enter release year Ex: 2012</string>
-    <string name="NoRatingRuntime">Enter Rating/Runtime</string>
     <string name="NoStore">Enter Store: </string>
     <string name="NoImage">Type valid URL for image</string>
 

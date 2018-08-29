@@ -23,14 +23,7 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, mCurrentFragment)
                 .commit();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent addIntent = new Intent(getApplicationContext(), AddItemActivity.class);
-                startActivity(addIntent);
-            }
-        });
+
     }
 
     @Override

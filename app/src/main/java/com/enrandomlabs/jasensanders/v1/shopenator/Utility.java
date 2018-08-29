@@ -3,6 +3,7 @@ package com.enrandomlabs.jasensanders.v1.shopenator;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -266,6 +267,18 @@ public class Utility {
             //Log.e("Utility class","Error splitting addDate year");
             return "XXXX";
         }
+
+    }
+
+    public static ContentValues createContentValues(String[] data, String[] rowProjection){
+
+        ContentValues insertItem = new ContentValues();
+        if(data.length == rowProjection.length) {
+            for (int i = 0; i < data.length; i++) {
+                insertItem.put(rowProjection[i], data[i]);
+            }
+        }
+        return insertItem;
 
     }
 

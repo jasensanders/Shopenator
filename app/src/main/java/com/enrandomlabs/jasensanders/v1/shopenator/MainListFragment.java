@@ -1,9 +1,11 @@
 package com.enrandomlabs.jasensanders.v1.shopenator;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -98,6 +100,15 @@ public class MainListFragment extends Fragment implements LoaderManager.LoaderCa
 
         // Initialize recycler view
         itemList = root.findViewById(R.id.content_list);
+
+        FloatingActionButton fab = (FloatingActionButton) root.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent addIntent = new Intent(getActivity(), AddItemActivity.class);
+                startActivity(addIntent);
+            }
+        });
 
         // Load available data from ShopenatorProvider
         getLoaderManager().initLoader(mListLoader, null, this);

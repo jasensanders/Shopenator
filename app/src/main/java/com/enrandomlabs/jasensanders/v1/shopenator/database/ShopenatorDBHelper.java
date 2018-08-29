@@ -30,14 +30,14 @@ public class ShopenatorDBHelper extends SQLiteOpenHelper {
                 ItemEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_PACKAGE_ART + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_BARCODE_IMG + " TEXT NOT NULL, " +
-                ItemEntry.COLUMN_SEVEN + " TEXT NOT NULL, " +
+                ItemEntry.COLUMN_PRICE + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_R_DATE + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_ADD_DATE + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_STORE + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_NOTES + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_STATUS + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_DESCRIPTION + " TEXT NOT NULL, " +
-                ItemEntry.COLUMN_FOURTEEN + " TEXT NOT NULL, " +
+                ItemEntry.COLUMN_URL + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_FIFTEEN + " TEXT NOT NULL, " +
                 ItemEntry.COLUMN_SIXTEEN + " TEXT NOT NULL, " +
                 "UNIQUE (" + ItemEntry.COLUMN_UPC +") ON CONFLICT REPLACE"+
