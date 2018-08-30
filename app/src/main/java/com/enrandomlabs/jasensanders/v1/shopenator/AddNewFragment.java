@@ -44,16 +44,21 @@ import java.util.Calendar;
  */
 public class AddNewFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    // Fragment initialization parameters a Uri or null
     private static final String ARG_PARAM1 = "param1";
 
-    //Barcode Flag
+    // Barcode Flag
     private static final int RC_BARCODE_CAPTURE = 9001;
 
-    //Loader type
-
+    // Loader type
     private static final int ITEM_LOADER = 1001;
 
+    // Barcode image prefix
+    private static final String BARCODE_IMG_PREFIX = "http://www.searchupc.com/drawupc.aspx?q=";
+
+    // SavedInstanceState Keys
+    private static final String SAVED_UPC = "com.enrandomlabs.jasensanders.v1.shopenator.SAVED_UPC";
+    private static final String SAVED_VALUES = "com.enrandomlabs.jasensanders.v1.shopenator.SAVED_VALUES";
 
     private Uri mItemData;
     private boolean mIsDetailView = false;
@@ -106,6 +111,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
         return fragment;
     }
 
+    //TODO: LIFECYCLE STATE TRACKING
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +121,11 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
                 mUPCString = DataContract.ItemEntry.getUpcFromUri(mItemData);
                 mIsDetailView = true;
             }else {mIsDetailView = false;}
+
+        }
+        if(savedInstanceState != null){
+            mUPCString = savedInstanceState.getString(SAVED_UPC);
+            mBarcodeImage = BARCODE_IMG_PREFIX + mUPCString;
 
         }
     }
@@ -139,14 +150,27 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
             getLoaderManager().initLoader(ITEM_LOADER, null, this);
         }
 
+        if(savedInstanceState != null){
+
+            onRestoreState(savedInstanceState);
+        }
+
         return root;
 
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(SAVED_UPC, mUPCString);
+        outState.putStringArray(SAVED_VALUES, loadItemData(mIsDetailView));
     }
 
 
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+
         return new CursorLoader(getActivity(),
                 mItemData,
                 DataContract.ITEM_COLUMNS,
@@ -232,8 +256,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
                 @Override
                 public void onClick(View v) {
 
-                    // Launch UPCService
-                    // Verify UPC else Toast re-enter number
+                    // Verify UPC and submit
                     onSubmitUpc();
                 }
             });
@@ -242,13 +265,31 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
         mSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                String[] item = loadItemData(mIsDetailView);
+
                 // Save or Update to database
                 if(mIsDetailView){
-                    ContentValues updateValues = Utility.createContentValues(loadItemData(mIsDetailView), DataContract.UPDATE_ITEM_COLUMNS);
+
+                    ContentValues updateValues = Utility.createContentValues(item, DataContract.UPDATE_ITEM_COLUMNS);
                     updateDB(updateValues);
+
                 }else{
-                    ContentValues insertValues = Utility.createContentValues(loadItemData(mIsDetailView), DataContract.INSERT_ITEM_COLUMNS);
-                    insertToDB(insertValues);
+
+                    // Verify minimum input. First! Must have UPC and Title
+
+                    if(Utility.verifyUPC(item[1]) && !item[3].equals("")){
+                        ContentValues insertValues = Utility.createContentValues(item, DataContract.INSERT_ITEM_COLUMNS);
+                        insertToDB(insertValues);
+
+                    }else{
+
+                        // Apologise to user
+                        Toast message = Toast.makeText(getActivity(), "Please enter a valid UPC and Product Name", Toast.LENGTH_LONG);
+                        message.setGravity(Gravity.CENTER, 0, 0);
+                        message.show();
+                    }
+
                 }
             }
         });
@@ -269,7 +310,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
                     mUPCString = barcode.displayValue;
                     mItemData = DataContract.ItemEntry.buildUPCUri(barcode.displayValue);
                     mUpc.setText(barcode.displayValue);
-                    mBarcodeImage = "http://www.searchupc.com/drawupc.aspx?q=" + mUPCString;
+                    mBarcodeImage = BARCODE_IMG_PREFIX + mUPCString;
 
                 } else {
 
@@ -293,20 +334,58 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void updateViews(Cursor data){
 
-        // Update the views with data
-        mUPCString = data.getString(DataContract.COL_UPC);
-        mImageSource = data.getString(DataContract.COL_ART);
-        mBarcodeImage = data.getString(DataContract.COL_BAR_IMG);
-        mOwned = (data.getString(DataContract.COL_STATUS).equals(DataContract.STATUS_OWN));
+        // If we are loading values from database
+        if(data != null) {
+            // Update the views with data
+            mUPCString = data.getString(DataContract.COL_UPC);
+            mImageSource = data.getString(DataContract.COL_ART);
+            mBarcodeImage = data.getString(DataContract.COL_BAR_IMG);
+            mOwned = (data.getString(DataContract.COL_STATUS).equals(DataContract.STATUS_OWN));
 
-        Glide.with(getActivity()).load(mImageSource).fitCenter().into(mImage);
-        mTitle.setText(data.getString(DataContract.COL_TITLE));
-        mStore.setText(data.getString(DataContract.COL_STORE));
-        mPrice.setText(data.getString(DataContract.COL_PRICE));
-        mUrl.setText(data.getString(DataContract.COL_URL));
-        mDescription.setText(data.getString(DataContract.COL_DESC));
-        mNotes.setText(data.getString(DataContract.COL_NOTES));
+            Glide.with(getActivity()).load(mImageSource).fitCenter().into(mImage);
+            mTitle.setText(data.getString(DataContract.COL_TITLE));
+            mStore.setText(data.getString(DataContract.COL_STORE));
+            mPrice.setText(data.getString(DataContract.COL_PRICE));
+            mUrl.setText(data.getString(DataContract.COL_URL));
+            mDescription.setText(data.getString(DataContract.COL_DESC));
+            mNotes.setText(data.getString(DataContract.COL_NOTES));
+        }
 
+
+    }
+
+    private void onRestoreState(Bundle savedInstanceState){
+        String[] values = savedInstanceState.getStringArray(SAVED_VALUES);
+
+        // If this is a detail view load most current values
+            if(values.length == 9){
+                mUpc.setText(mUPCString);
+                mImageSource = values[2];
+                mOwned = (values[6].equals(DataContract.STATUS_OWN));
+                Glide.with(getActivity()).load(mImageSource).fitCenter().error(R.drawable.gears_placeholder2).into(mImage);
+                mTitle.setText(values[1]);
+                mStore.setText(values[4]);
+                mPrice.setText(values[3]);
+                mUrl.setText(values[8]);
+                mDescription.setText(values[7]);
+                mNotes.setText(values[5]);
+
+
+            }else{
+                // Otherwise it a new item, add latest values.
+                mUpc.setText(mUPCString);
+                mImageSource = values[4];
+                Glide.with(getActivity()).load(mImageSource).fitCenter().error(R.drawable.gears_placeholder2).into(mImage);
+                mOwned = values[11].equals(DataContract.STATUS_OWN);
+                mTitle.setText(values[3]);
+                mStore.setText(values[9]);
+                mPrice.setText(values[6]);
+                mUrl.setText(values[13]);
+                mDescription.setText(values[12]);
+                mNotes.setText(values[10]);
+
+
+            }
 
     }
 
@@ -317,12 +396,18 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
         DateFormat df = DateFormat.getDateInstance();
         String addDate = df.format(Calendar.getInstance().getTime());
 
+        // Verify ImageSource
+        if(mImageSource == null){
+            mImageSource = DataContract.PLACEHOLDER;
+        }
+
         // pull item data and put in String array based on view type
 
         if(!mIsDetailView) {
 
             data.add(DataContract.SEARCHUPC_API_ID);
-            data.add(mUpc.getText().toString());
+            mUPCString = mUpc.getText().toString();
+            data.add(mUPCString);
 
         }
 
@@ -332,6 +417,8 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
         if(!mIsDetailView) {
 
+
+            mBarcodeImage = BARCODE_IMG_PREFIX + mUPCString;
             data.add(mBarcodeImage);
 
         }
@@ -442,11 +529,13 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
         String upc = mUpc.getText().toString();
 
-        if(upc.length()==10 && !upc.startsWith("978")){
+        if(Utility.verifyUPC(upc)){
 
-            upc = "978" + upc;
-        }
-        if(upc.length()==12 || upc.length()==13){
+            // Add prefix to ten digit upc if necessary
+            if(upc.length()==10 && !upc.startsWith("978")){
+
+                upc = "978" + upc;
+            }
 
             // Start the progress bar
             if(mSpin != null) {

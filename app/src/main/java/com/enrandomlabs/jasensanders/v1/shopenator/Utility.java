@@ -282,5 +282,10 @@ public class Utility {
 
     }
 
+    public static boolean verifyUPC(String upc){
+
+        return (upc.length() == 10 || upc.length() == 12 || upc.length() == 13);
+    }
+
 
 }
