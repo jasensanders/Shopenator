@@ -529,13 +529,10 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
         String upc = mUpc.getText().toString();
 
-        if(Utility.verifyUPC(upc)){
+        //Check upc for correctness and make sure 10digit isbns become 13 digit.
+        upc = Utility.rectifyUPC(upc);
 
-            // Add prefix to ten digit upc if necessary
-            if(upc.length()==10 && !upc.startsWith("978")){
-
-                upc = "978" + upc;
-            }
+        if(upc != null){
 
             // Start the progress bar
             if(mSpin != null) {

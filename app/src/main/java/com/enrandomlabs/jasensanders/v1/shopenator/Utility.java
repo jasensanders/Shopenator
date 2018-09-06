@@ -282,9 +282,127 @@ public class Utility {
 
     }
 
+    public static String rectifyUPC(String upc){
+        if(verifyUPC(upc)){
+
+            if(upc.length() == 10 ){
+
+                return isbn10to13(upc);
+            }
+            if(upc.length() == 12 || upc.length() == 13){
+                return upc;
+            }
+        }
+        return null;
+    }
+
+
     public static boolean verifyUPC(String upc){
 
-        return (upc.length() == 10 || upc.length() == 12 || upc.length() == 13);
+
+        if(upc.length() == 10){
+
+            //check digit
+            int sum =0;
+            int multiple = 10;
+            for (int i=0; i<10; i++){
+                sum = sum + (Character.getNumericValue(upc.charAt(i)) * multiple);
+                multiple--;
+            }
+
+            return sum%11==0;
+
+        }
+        if(upc.length() == 12){
+
+
+            int multiple = 3;
+            // Initialize sum
+            int sum = 0;
+
+            for(int i=0; i<12; i++){
+                //even index is the odd value when zero indexed
+                if(i%2==0){
+                    sum = sum + (Character.getNumericValue(upc.charAt(i))*multiple);
+                }else{
+                    sum = sum + Character.getNumericValue(upc.charAt(i));
+                }
+            }
+
+            return sum%10==0;
+
+        }
+        if(upc.length() == 13){
+            int multiple = 3;
+            // Initialize sum
+            int sum = 0;
+
+            for(int i=0; i<13; i++){
+                //even numbered index is odd sequentially.
+                if(i%2==0){
+                    sum = sum + Character.getNumericValue(upc.charAt(i));
+                }else{
+                    sum = sum + (Character.getNumericValue(upc.charAt(i))*multiple);
+                }
+            }
+
+            return sum%10==0;
+
+        }
+
+        return false;
+    }
+
+    public static String isbn10to13(String isbn10){
+        if(isbn10.length()==10) {
+
+            //prep new number - add "978" to front and drop last digit
+            String temp = "978" + isbn10.substring(0,9);
+
+
+            int checksum = 38; // term value sum of "978"
+
+            int term1 = Character.getNumericValue(isbn10.charAt(0))*3;
+            int term2 = Character.getNumericValue(isbn10.charAt(1));
+            int term3 = Character.getNumericValue(isbn10.charAt(2))*3;
+            int term4 = Character.getNumericValue(isbn10.charAt(3));
+            int term5 = Character.getNumericValue(isbn10.charAt(4))*3;
+            int term6 = Character.getNumericValue(isbn10.charAt(5));
+            int term7 = Character.getNumericValue(isbn10.charAt(6))*3;
+            int term8 = Character.getNumericValue(isbn10.charAt(7));
+            int term9 = Character.getNumericValue(isbn10.charAt(8))*3;
+            checksum = checksum + term1 + term2 + term3 + term4 + term5 + term6 + term7 + term8
+                    + term9;
+            int checkdigit = checksum%10;
+            if(checkdigit != 0) {
+                checkdigit = 10 - checkdigit;
+            }
+
+            temp = temp + String.valueOf(checkdigit);
+            return temp;
+        }else{
+            return null;
+        }
+    }
+
+    public static String upcEtoA(String in){
+
+        //TODo convert upc-e to upc-a;
+        //ToDo update verify/rectify to verify 6 digit upc-e values.
+        return null;
+    }
+
+    public static String reverse(String input){
+
+        char[] arr = input.toCharArray();
+        int end = input.length()-1;
+        for (int i=0; i<end; i++){
+            char tmp = arr[i];
+            arr[i] = arr[end];
+            arr[end]=tmp;
+            end--;
+        }
+        return new String(arr);
     }
 
 
