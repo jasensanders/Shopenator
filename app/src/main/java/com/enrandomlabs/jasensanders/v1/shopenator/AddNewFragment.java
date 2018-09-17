@@ -1,7 +1,10 @@
 package com.enrandomlabs.jasensanders.v1.shopenator;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,8 +14,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,8 +49,19 @@ import java.util.Calendar;
  */
 public class AddNewFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String LOG_TAG = AddNewFragment.class.getSimpleName();
+
     // Fragment initialization parameters a Uri or null
     private static final String ARG_PARAM1 = "param1";
+
+    //Message Receiver Keys
+    public static final String SERVICE_EVENT_UPC_LOOKUP = "SERVICE_EVENT_UPC_LOOKUP";
+    public static final String SERVICE_EXTRA_UPC_LOOKUP = "SERVICE_EXTRA_UPC_LOOKUP";
+
+    //Error
+    private static final String NOT_FOUND = UPCService.NOT_FOUND;
+    private static final String SERVER_ERROR = UPCService.SERVER_ERROR;
+    private static final String INTERNAL_ERROR = UPCService.INTERNAL_ERROR;
 
     // Barcode Flag
     private static final int RC_BARCODE_CAPTURE = 9001;
@@ -66,6 +82,8 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView mError;
 
     private LinearLayout mInputUpcLayout;
+
+    private BroadcastReceiver mMessageReceiver;
 
     private String mImageSource;
     private String mBarcodeImage;
@@ -128,6 +146,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
             mBarcodeImage = BARCODE_IMG_PREFIX + mUPCString;
 
         }
+        registerMessageReceiver();
     }
 
     @Override
@@ -159,6 +178,76 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
+    private class ServiceMessageReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent.getStringArrayExtra(SERVICE_EXTRA_UPC_LOOKUP) != null ) {
+                //Kill the progress bar
+                if(mSpin != null) {
+                    mSpin.setVisibility(View.GONE);
+                }
+                //Report to user with results
+                String[] received = intent.getStringArrayExtra(SERVICE_EXTRA_UPC_LOOKUP);
+                if (received[0].equals(NOT_FOUND)|| received[0].equals(SERVER_ERROR) || received[0].equals(INTERNAL_ERROR) ) {
+
+                    Log.e(LOG_TAG, "SendApologies Error Received: "+ received[0] + received[2]);
+                    Toast.makeText(getActivity(), received[1], Toast.LENGTH_SHORT).show();
+
+                }else{
+
+                    // If Error message showing, clear it.
+                    if(mError.getVisibility() == View.VISIBLE){
+                        mError.setVisibility(View.GONE);
+                    }
+                    // We got Data! Lets show what we got!!!
+                    updateViews(null, received);
+
+
+                }
+
+            }
+
+        }
+    }
+
+    private void registerMessageReceiver(){
+
+        //If there isn't a messageReceiver yet make one.
+        if(mMessageReceiver == null) {
+            mMessageReceiver = new ServiceMessageReceiver();
+        }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(SERVICE_EVENT_UPC_LOOKUP);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mMessageReceiver, filter);
+
+    }
+    private void unRegisterMessageReceiver(){
+
+        if(mMessageReceiver != null){
+            try {
+                LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mMessageReceiver);
+            }catch(Exception e){
+                Log.e(LOG_TAG, "messageReciever unregisterd already", e);
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        unRegisterMessageReceiver();
+        super.onPause();
+    }
+
+    /** Called when returning to the activity */
+    @Override
+    public void onResume() {
+        super.onResume();
+        registerMessageReceiver();
+    }
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -184,7 +273,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
         if(data.moveToFirst()){
 
-            updateViews(data);
+            updateViews(data, null);
         }
 
     }
@@ -197,6 +286,8 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
 
     private void initializeViews(View view, final boolean mIsDetailView){
+
+        //Todo: Make extra UPC TextView for displaying the upc.
 
         // Get References
         mError = view.findViewById(R.id.error);
@@ -271,7 +362,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
                 // Save or Update to database
                 if(mIsDetailView){
 
-                    ContentValues updateValues = Utility.createContentValues(item, DataContract.UPDATE_ITEM_COLUMNS);
+                    ContentValues updateValues = Utility.createStringContentValues(item, DataContract.UPDATE_ITEM_COLUMNS);
                     updateDB(updateValues);
 
                 }else{
@@ -279,7 +370,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
                     // Verify minimum input. First! Must have UPC and Title
 
                     if(Utility.verifyUPC(item[1]) && !item[3].equals("")){
-                        ContentValues insertValues = Utility.createContentValues(item, DataContract.INSERT_ITEM_COLUMNS);
+                        ContentValues insertValues = Utility.createStringContentValues(item, DataContract.INSERT_ITEM_COLUMNS);
                         insertToDB(insertValues);
 
                     }else{
@@ -332,7 +423,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-    private void updateViews(Cursor data){
+    private void updateViews(Cursor data, String[] received){
 
         // If we are loading values from database
         if(data != null) {
@@ -349,6 +440,14 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
             mUrl.setText(data.getString(DataContract.COL_URL));
             mDescription.setText(data.getString(DataContract.COL_DESC));
             mNotes.setText(data.getString(DataContract.COL_NOTES));
+        }
+
+        if(received != null){
+            mTitle.setText(received[0]);
+            mImageSource = received[1];
+            Glide.with(getActivity()).load(mImageSource).fitCenter().into(mImage);
+            mBarcodeImage = BARCODE_IMG_PREFIX + mUpc.getText();
+
         }
 
 
@@ -514,7 +613,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
     public void launchBarcodeScanner(){
 
-        //If an error message hasn't cleared, then clear it.
+        // If an error message hasn't cleared, then clear it.
         if(mError.getVisibility() == View.VISIBLE){
             mError.setVisibility(View.GONE);
         }
@@ -529,7 +628,7 @@ public class AddNewFragment extends Fragment implements LoaderManager.LoaderCall
 
         String upc = mUpc.getText().toString();
 
-        //Check upc for correctness and make sure 10digit isbns become 13 digit.
+        // Check upc for correctness and make sure 10 digit isbn becomes 13 digit.
         upc = Utility.rectifyUPC(upc);
 
         if(upc != null){

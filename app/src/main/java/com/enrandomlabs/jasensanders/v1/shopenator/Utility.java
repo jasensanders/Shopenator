@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -24,7 +25,7 @@ import java.nio.channels.FileChannel;
 
 public class Utility {
 
-    public static final String FLAG_FIRST_RUN = "FOLIO_FIRST_RUN";
+
     public static final String BACKUP_FOLDER = "/Shopenator";
 
     public static void setStringPreference(Context c, String key, String value){
@@ -47,18 +48,48 @@ public class Utility {
         return settings.getString(key, deFault);
     }
 
-    public static boolean isFirstRun(Context context){
+    // Check first run of any activity of fragment by passing its name into String "which"
+    // If "which" is null it will check if this is the first run of the whole app.
+    public static boolean isFirstRun(Context context, final String which){
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
-        if(settings.getBoolean(FLAG_FIRST_RUN, true)){
-            editor.putBoolean(FLAG_FIRST_RUN, false).apply();
+        final String FIRST_RUN_FLAG;
+        if(which == null) {
+
+            FIRST_RUN_FLAG = context.getPackageName() + "_FIRST_RUN_FLAG";
+        }
+        else{
+
+            FIRST_RUN_FLAG = which + "_FIRST_RUN_FLAG";
+        }
+        if(settings.getBoolean(FIRST_RUN_FLAG, true)){
+
+            editor.putBoolean(FIRST_RUN_FLAG, false).apply();
             return true;
+
         }
         return false;
+
+    }
+
+    public static long getFirstRunTime(Context context){
+        String name = context.getPackageName();
+        long installed;
+        try {
+            installed = context
+                    .getPackageManager()
+                    .getPackageInfo(name, 0)
+                    .firstInstallTime
+            ;
+        }catch (PackageManager.NameNotFoundException e){
+            e.printStackTrace();
+            return 0;
+        }
+        return installed;
     }
 
     //Checks for internet connectivity
-    static public boolean isNetworkAvailable(Context c) {
+    public static boolean isNetworkAvailable(Context c) {
         ConnectivityManager cm =
                 (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -66,11 +97,72 @@ public class Utility {
         return activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
     }
-    //Checks if the String is numeric
-    static public boolean isNum(String s) {
-        int len = s.length();
+    //Checks if the String is numeric  Does not check for size.
+    public static boolean isNum(String s) {
+
+        return isHex(s) || isDec(s) || isBin(s) || isInt(s);
+
+    }
+
+    public static boolean isHex(String h){
+
+        if((h.charAt(0) == '0' && h.charAt(1) == 'x') ){
+            return h.substring(2,h.length()).matches("([0-9]|[A-F]|[a-f])+");
+        }
+
+        if(h.charAt(0) == '#'){
+            return h.substring(1,h.length()).matches("([0-9]|[A-F]|[a-f])+");
+        }
+        return false;
+    }
+
+    public static boolean isDec(String d){
+
+        // Strip off sign if present
+        if(d.charAt(0) == '-'){
+            d = d.substring(1);
+        }
+
+        // Check for digits, allow only one dot
+        boolean dot = false;
+        int len = d.length();
         for (int i = 0; i < len; ++i) {
-            if (!Character.isDigit(s.charAt(i))) {
+            if (!Character.isDigit(d.charAt(i)) ) {
+                if (d.charAt(i) == '.' ){
+                    if(!dot) {
+                        dot = true;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    return false;
+                }
+            }
+
+        }
+
+        return dot;
+    }
+
+    public static boolean isBin(String b){
+        for(int i =0; i<b.length(); i++){
+            if(b.charAt(i) != '0' && b.charAt(i) != '1'){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isInt(String in){
+
+        int start = 0;
+        if(in.charAt(0) == '-'){
+            start = 1;
+        }
+
+        int len = in.length();
+        for (int i = start; i < len; ++i) {
+            if (!Character.isDigit(in.charAt(i)) ) {
                 return false;
             }
         }
@@ -78,23 +170,18 @@ public class Utility {
         return true;
     }
 
-    //Checks if  the string is numeric and the right length for a UPC barcode.
-    static public boolean isValidUpc(String s) {
-        if(isNum(s)){
-            //s.length() == 10 || s.length() == 13
-            if(s.length() ==12 || s.length() == 10 || s.length() == 13){
-                return true;
-            }
-        }
-        return false;
-    }
 
-    public static String stringArrayToString(String[] inString){
+    public static String stringArrayToString(String[] inString, String separator){
+        String space = " ";
         StringBuilder result = new StringBuilder();
+
+        if(separator.equals("") || separator.equals(" ")){
+            space = "";
+        }
         int i = 0;
         for(String add: inString){
             if(i != inString.length -1) {
-                String toAdd = add + ", ";
+                String toAdd = add + separator + space;
                 result.append(toAdd);
                 i++;
             }else{
@@ -103,6 +190,19 @@ public class Utility {
         }
 
         return result.toString();
+    }
+
+    public static String reverse(String input){
+
+        char[] arr = input.toCharArray();
+        int end = input.length()-1;
+        for (int i=0; i<end; i++){
+            char tmp = arr[i];
+            arr[i] = arr[end];
+            arr[end]=tmp;
+            end--;
+        }
+        return new String(arr);
     }
 
     public static boolean copyFile(File src, File dst){
@@ -126,6 +226,17 @@ public class Utility {
         return true;
     }
 
+    public static boolean moveFile(File src, File dst){
+
+        boolean success = false;
+        // If you can't copy original, then don't delete it.
+        if(copyFile(src, dst)){
+            success = deleteFile(src);
+        }
+        return success;
+
+    }
+
     public static boolean deleteFile(File filePathIncludingFilename) {
         boolean result;
         try {
@@ -138,7 +249,7 @@ public class Utility {
 
     }
 
-    public static void reStart(Activity activity, int delayInMilliseconds, Class<?> launcherClass){
+    public static void restart(Activity activity, int delayInMilliseconds, Class<?> launcherClass){
         //Activity to kill and context to start from: activity
         //Delay in MS: delayInMilliseconds
         //Launcher Class that starts your app: launcherClass
@@ -157,6 +268,24 @@ public class Utility {
 
     }
 
+    public static void exit(Activity activity){
+        if(android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN){
+            activity.finish();
+        }else {
+            activity.finishAffinity();
+        }
+    }
+
+    public static boolean APIgreaterThan(int apiLevel){
+        return Build.VERSION.SDK_INT > apiLevel;
+    }
+
+    public static boolean APIlessThan(int apiLevel){
+        return Build.VERSION.SDK_INT < apiLevel;
+    }
+
+
+
     /* Checks if external storage is available for read and write */
     public static boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -164,7 +293,7 @@ public class Utility {
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    public static boolean backupDBtoMobileDevice(Context context, String databaseName, String backupDatabaseName){
+    public static boolean backupDatabaseToExternal(Context context, String databaseName, String backupDatabaseName){
 
         if(isExternalStorageWritable()) {
             try {
@@ -207,7 +336,7 @@ public class Utility {
 
     }
 
-    public static boolean restoreDBfromMobileDevice(Context context, String databaseName, String backupDatabaseName){
+    public static boolean restoreDatabaseFromExternal(Context context, String databaseName, String backupDatabaseName){
 
         if(isExternalStorageWritable()) {
             FileChannel src;
@@ -270,7 +399,7 @@ public class Utility {
 
     }
 
-    public static ContentValues createContentValues(String[] data, String[] rowProjection){
+    public static ContentValues createStringContentValues(String[] data, String[] rowProjection){
 
         ContentValues insertItem = new ContentValues();
         if(data.length == rowProjection.length) {
@@ -300,54 +429,56 @@ public class Utility {
     public static boolean verifyUPC(String upc){
 
 
-        if(upc.length() == 10){
+        if(isInt(upc)) {
+            if (upc.length() == 10) {
 
-            //check digit
-            int sum =0;
-            int multiple = 10;
-            for (int i=0; i<10; i++){
-                sum = sum + (Character.getNumericValue(upc.charAt(i)) * multiple);
-                multiple--;
-            }
-
-            return sum%11==0;
-
-        }
-        if(upc.length() == 12){
-
-
-            int multiple = 3;
-            // Initialize sum
-            int sum = 0;
-
-            for(int i=0; i<12; i++){
-                //even index is the odd value when zero indexed
-                if(i%2==0){
-                    sum = sum + (Character.getNumericValue(upc.charAt(i))*multiple);
-                }else{
-                    sum = sum + Character.getNumericValue(upc.charAt(i));
+                //check digit
+                int sum = 0;
+                int multiple = 10;
+                for (int i = 0; i < 10; i++) {
+                    sum = sum + (Character.getNumericValue(upc.charAt(i)) * multiple);
+                    multiple--;
                 }
+
+                return sum % 11 == 0;
+
             }
+            if (upc.length() == 12) {
 
-            return sum%10==0;
 
-        }
-        if(upc.length() == 13){
-            int multiple = 3;
-            // Initialize sum
-            int sum = 0;
+                int multiple = 3;
+                // Initialize sum
+                int sum = 0;
 
-            for(int i=0; i<13; i++){
-                //even numbered index is odd sequentially.
-                if(i%2==0){
-                    sum = sum + Character.getNumericValue(upc.charAt(i));
-                }else{
-                    sum = sum + (Character.getNumericValue(upc.charAt(i))*multiple);
+                for (int i = 0; i < 12; i++) {
+                    //even index is the odd value when zero indexed
+                    if (i % 2 == 0) {
+                        sum = sum + (Character.getNumericValue(upc.charAt(i)) * multiple);
+                    } else {
+                        sum = sum + Character.getNumericValue(upc.charAt(i));
+                    }
                 }
+
+                return sum % 10 == 0;
+
             }
+            if (upc.length() == 13) {
+                int multiple = 3;
+                // Initialize sum
+                int sum = 0;
 
-            return sum%10==0;
+                for (int i = 0; i < 13; i++) {
+                    //even numbered index is odd sequentially.
+                    if (i % 2 == 0) {
+                        sum = sum + Character.getNumericValue(upc.charAt(i));
+                    } else {
+                        sum = sum + (Character.getNumericValue(upc.charAt(i)) * multiple);
+                    }
+                }
 
+                return sum % 10 == 0;
+
+            }
         }
 
         return false;
@@ -385,25 +516,14 @@ public class Utility {
         }
     }
 
-    public static String upcEtoA(String in){
+    public static String[] upcEtoA(String in){
 
         //TODo convert upc-e to upc-a;
         //ToDo update verify/rectify to verify 6 digit upc-e values.
         return null;
     }
 
-    public static String reverse(String input){
 
-        char[] arr = input.toCharArray();
-        int end = input.length()-1;
-        for (int i=0; i<end; i++){
-            char tmp = arr[i];
-            arr[i] = arr[end];
-            arr[end]=tmp;
-            end--;
-        }
-        return new String(arr);
-    }
 
 
 }

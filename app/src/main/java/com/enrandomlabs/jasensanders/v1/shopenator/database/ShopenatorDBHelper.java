@@ -8,6 +8,8 @@ import android.provider.BaseColumns;
 
 import com.enrandomlabs.jasensanders.v1.shopenator.database.DataContract.ItemEntry;
 
+import java.util.ArrayList;
+
 public class ShopenatorDBHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION =1;
@@ -60,19 +62,95 @@ public class ShopenatorDBHelper extends SQLiteOpenHelper {
         return DATABASE_NAME;
     }
 
-    public void dropTables(SQLiteDatabase db){
-        db.execSQL("DROP TABLE IF EXISTS " + ItemEntry.TABLE_NAME);
+
+    // Drop all tables
+    public void dropTables(){
+
+        String[] tableNames = this.getTables();
+
+        for(String table: tableNames) {
+
+            this.getWritableDatabase().execSQL("DROP TABLE IF EXISTS " + table);
+        }
 
     }
 
-    public boolean isEmpty(SQLiteDatabase db, final String tablename, final String[] columns){
+    // Drop a table
+    public void dropTables(String tableName){
 
-        Cursor c = db.query(tablename, columns, null, null, null, null, BaseColumns._ID + " ASC", null);
-        if(c != null && c.moveToFirst()) {
-            c.close();
-            return false;
+        this.getWritableDatabase().execSQL("DROP TABLE IF EXISTS " + tableName);
+    }
+
+    public String[] getTables(){
+        ArrayList<String> tables = new ArrayList<>();
+        Cursor c = this.getReadableDatabase().rawQuery("SELECT name FROM sqlite_master WHERE type= ? ORDER BY name; ",new String[] {"table"});
+        if(c.moveToFirst()){
+            int count = c.getCount();
+            for(int i =0; i<count; i++){
+                tables.add(c.getString(i));
+            }
+        }
+        c.close();
+        return tables.toArray(new String[tables.size()]);
+    }
+
+    public String[] getColumns(String tableName){
+
+        Cursor c = this.getReadableDatabase().query(tableName, null, null, null, null, null, null);
+        String[] columnNames = c.getColumnNames();
+        c.close();
+
+        return columnNames;
+
+    }
+
+    // boolean returns tableName is empty
+    public boolean isEmpty(final String tableName){
+
+        if(tableName != null){
+
+            String[] columns = getColumns(tableName);
+
+            Cursor c = this.getReadableDatabase().query(tableName, columns, null,
+                    null, null, null,
+                    BaseColumns._ID + " ASC", null);
+            if (c != null && c.moveToFirst()) {
+                c.close();
+                return false;
+            }
+            return true;
+
+        }else{
+            return true;
+        }
+
+    }
+
+    //  returns boolean on whole database
+    public boolean isEmpty(){
+        String[] tables = this.getTables();
+
+        for(String table: tables) {
+
+            String[] columns = getColumns(table);
+
+            Cursor c = this.getReadableDatabase().query(table, columns, null,
+                    null, null, null,
+                    BaseColumns._ID + " ASC", null);
+            if (c != null && c.moveToFirst()) {
+                c.close();
+                return false;
+            }
+
         }
         return true;
+    }
 
+    public String toCSV(){
+        return null;
+    }
+
+    public String toJSON(){
+        return null;
     }
 }

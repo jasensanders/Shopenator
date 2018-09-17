@@ -23,17 +23,22 @@ import java.net.URL;
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p>
- * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
 public class UPCService extends IntentService {
     private static final String LOG_TAG = UPCService.class.getSimpleName();
 
     //Error
-    private static final String NOT_FOUND = "NOT_FOUND";
-    private static final String SERVER_ERROR = "ERROR";
-    // TODO: Rename actions, choose action names that describe tasks that this
+    public static final String NOT_FOUND = LOG_TAG + "_NOT_FOUND";
+    public static final String SERVER_ERROR = LOG_TAG + "_SERVER_ERROR";
+    public static final String INTERNAL_ERROR = LOG_TAG + "_INTERNAL_ERROR";
+
+    // Messages
+    private static final String MESSAGE_NOT_FOUND = "Sorry, The upc was not found in our database.";
+    private static final String MESSAGE_SERVER_ERROR = "Sorry, something went wrong with the server.";
+    private static final String MESSAGE_INTERNAL_ERROR = "Sorry, the internal data turned up empty.";
+
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_GET_UPC = "com.enrandomlabs.jasensanders.v1.shopenator.services.action.ACTION_GET_UPC";
 
@@ -52,7 +57,7 @@ public class UPCService extends IntentService {
      *
      * @see IntentService
      */
-    // TODO: Customize helper method
+
     public static void startService(Context context, String param1) {
         Intent intent = new Intent(context, UPCService.class);
         intent.setAction(ACTION_GET_UPC);
@@ -80,15 +85,32 @@ public class UPCService extends IntentService {
     private void handleActionUpcLookup(String param1) {
 
         String upcJson = requestUPCdata(param1);
-        String[] results = parseUPCdataJson(upcJson);
 
-        //TODO: setup broadcast receiver first.
-        //sendDataBack(results);
+        String[] results = parseUPCdataJson(upcJson);
+        if(results != null){
+            if(results[0].equals(" ") || results[0].equals("")){
+                sendError(NOT_FOUND, MESSAGE_NOT_FOUND, param1);
+            }
+            else if(results[0].equals(INTERNAL_ERROR)){
+                sendError(INTERNAL_ERROR, MESSAGE_INTERNAL_ERROR, param1);
+            }
+            else if(results[0].equals(SERVER_ERROR)){
+                sendError(SERVER_ERROR, MESSAGE_SERVER_ERROR , results[2]);
+            }else{
+                sendDataBack(results);
+            }
+        }else{
+            // There's an error.
+            // we need to know which one and tell the user and log it.
+            sendError(INTERNAL_ERROR, MESSAGE_INTERNAL_ERROR, param1);
+        }
+
+
     }
 
     private String requestUPCdata(String upc){
 
-        if(upc == null){return null;}
+        if(upc == null){return INTERNAL_ERROR + ", " + "001";}
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -118,32 +140,39 @@ public class UPCService extends IntentService {
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
-            // Read the input stream into a String
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
-            if (inputStream == null) {
-                // Nothing to do.
-                return null;
-            }
-            reader = new BufferedReader(new InputStreamReader(inputStream));
+            //get result code
+            int responseCode = urlConnection.getResponseCode();
+            if(responseCode == 200) {
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                // But it does make debugging a *lot* easier if you print out the completed
-                // buffer for debugging.
-                buffer.append(line + "\n");
-            }
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    return SERVER_ERROR + ", " + "000";
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            if (buffer.length() == 0) {
-                // Stream was empty.  No point in parsing.
-                return null;
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return SERVER_ERROR + ", " + "000";
+                }
+                upcJsonStr = buffer.toString();
+            }else{
+                return SERVER_ERROR + ", " + String.valueOf(responseCode);
             }
-            upcJsonStr = buffer.toString();
         }catch (IOException e){
             Log.e(LOG_TAG, "IO Error UPC Request", e);
 
-            return null;
+            return SERVER_ERROR + ", " + "000";
         }finally {
             if(urlConnection != null){
                 urlConnection.disconnect();
@@ -161,28 +190,31 @@ public class UPCService extends IntentService {
     }
 
     private String[] parseUPCdataJson(String jsonString){
-        final String ROOT = "0";
-        final String PRODUCTNAME = "productname";
-        final String IMAGEURL = "imageurl";
+        if(jsonString != null) {
+            if(jsonString.startsWith(SERVER_ERROR) || jsonString.startsWith(INTERNAL_ERROR)){
+                return jsonString.split(", ");
+            }
+            final String ROOT = "0";
+            final String PRODUCTNAME = "productname";
+            final String IMAGEURL = "imageurl";
 
-        try {
-            JSONObject upcJson = new JSONObject(jsonString);
-            JSONObject root = upcJson.getJSONObject(ROOT);
-            String productName = root.getString(PRODUCTNAME);
-            String imageUrl = root.getString(IMAGEURL);
-            return new String[]{productName, imageUrl};
-        }catch(JSONException j){
-            Log.e(LOG_TAG, "Error Parsing UPC JSON", j );
-            return null;
+            try {
+                JSONObject upcJson = new JSONObject(jsonString);
+                JSONObject root = upcJson.getJSONObject(ROOT);
+                String productName = root.getString(PRODUCTNAME);
+                String imageUrl = root.getString(IMAGEURL);
+                return new String[]{productName, imageUrl};
+            } catch (JSONException j) {
+                Log.e(LOG_TAG, "Error Parsing UPC JSON", j);
+                return new String[]{INTERNAL_ERROR, "001"};
+            }
+        }else{
+            return new String[]{INTERNAL_ERROR, "001"};
         }
     }
 
-    private void sendApologies(String message){
-        sendDataBack( new String[]{message, "none", NOT_FOUND});
-    }
-
-    private void sendError(String message){
-        sendDataBack(new String[]{message, "none", SERVER_ERROR});
+    private void sendError(String type, String message,  String code){
+        sendDataBack(new String[]{type, message, code});
     }
 
     private void sendDataBack(String[] data){

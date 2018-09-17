@@ -141,6 +141,11 @@
                 android:inputType="textCapCharacters"
                 android:fontFamily="sans-serif-condensed"
                 android:textSize="@dimen/title_text_size" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/upcDisplay"
+                android:visibility="gone"/>
 
             <View android:id="@+id/divider" style="@style/Divider" />
 

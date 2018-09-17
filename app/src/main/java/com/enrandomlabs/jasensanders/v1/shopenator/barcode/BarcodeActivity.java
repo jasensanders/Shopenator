@@ -40,9 +40,8 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Toast;
 
-import com.enrandomlabs.jasensanders.v1.shopenator.Utility;
-import com.enrandomlabs.jasensanders.v1.shopenator.camera.CameraSource;
 import com.enrandomlabs.jasensanders.v1.shopenator.R;
+import com.enrandomlabs.jasensanders.v1.shopenator.camera.CameraSource;
 import com.enrandomlabs.jasensanders.v1.shopenator.camera.CameraSourcePreview;
 import com.enrandomlabs.jasensanders.v1.shopenator.camera.GraphicOverlay;
 import com.google.android.gms.common.ConnectionResult;
@@ -346,7 +345,7 @@ public class BarcodeActivity extends AppCompatActivity {
         Barcode barcode = null;
         if (graphic != null) {
             barcode = graphic.getBarcode();
-            if (barcode != null && Utility.isValidUpc(barcode.displayValue) ) {
+            if (barcode != null ) {
                 Intent data = new Intent();
                 data.putExtra(BarcodeObject, barcode);
                 setResult(CommonStatusCodes.SUCCESS, data);
